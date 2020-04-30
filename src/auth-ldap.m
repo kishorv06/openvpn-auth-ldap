@@ -43,7 +43,7 @@
 
 #import <TRVPNPlugin.h>
 
-#include <Foundation/NSAutoreleasePool.h>
+#include "TRAutoreleasePool.h"
 
 #import <pthread.h>
 
@@ -93,7 +93,7 @@ static TRString *quoteForSearch(const char *string) {
     const char specialChars[] = "*()\\"; /* RFC 2254. We don't care about NULL */
     TRString *result = [[TRString alloc] init];
     TRString *unquotedString, *part;
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    TRAutoreleasePool *pool = [[TRAutoreleasePool alloc] init];
 
     /* Make a copy of the string */
     unquotedString = [[TRString alloc] initWithCString: string];
@@ -134,7 +134,7 @@ static TRString *quoteForSearch(const char *string) {
         [unquotedString release];
     }
 
-    [pool drain];
+    [pool release];
 
     return (result);
 }
@@ -144,7 +144,7 @@ static TRString *createSearchFilter(TRString *template, const char *username) {
     TRString *result, *part;
     TRString *quotedName;
     const char userFormat[] = "%u";
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    TRAutoreleasePool *pool = [[TRAutoreleasePool alloc] init];
 
     /* Copy the template */
     templateString = [[[TRString alloc] initWithString: template] autorelease];
@@ -176,7 +176,7 @@ static TRString *createSearchFilter(TRString *template, const char *username) {
         [result appendString: templateString];
     }
 
-    [pool drain];
+    [pool release];
 
     return (result);
 }
@@ -469,7 +469,7 @@ void *async_handle_auth_user_pass_verify(void *ctx_ptr) {
     bool verified = NO;
 
     /* Per-request allocation pool. */
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    TRAutoreleasePool *pool = [[TRAutoreleasePool alloc] init];
 
     /* At the very least, we need a username to work with */
     if (!ctx->username) {
@@ -547,7 +547,7 @@ set_acf:
 
     if (pool != nil) {
         [TRLog debug: "Draining pool"];
-        [pool drain];
+        [pool release];
     }
 
     // pthread_mutex_unlock(&ctx->ldap_ctx_lock);
